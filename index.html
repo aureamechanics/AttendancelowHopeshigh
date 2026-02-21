@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CramPlan – Last Minute Study Planner</title>
+  <meta name="description" content="AI-powered last-minute study planner that prioritizes topics, calibrates to your reading speed, and generates condensed exam-ready notes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <!-- App Container -->
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">CramPlan</span>
+      </div>
+      <p class="tagline">Your last-minute study lifeline</p>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressBarContainer">
+      <div class="progress-steps">
+        <div class="progress-step active" data-step="1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Exam Info</span>
+        </div>
+        <div class="progress-line"><div class="progress-line-fill" id="line1"></div></div>
+        <div class="progress-step" data-step="2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Syllabus</span>
+        </div>
+        <div class="progress-line"><div class="progress-line-fill" id="line2"></div></div>
+        <div class="progress-step" data-step="3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Materials</span>
+        </div>
+        <div class="progress-line"><div class="progress-line-fill" id="line3"></div></div>
+        <div class="progress-step" data-step="4">
+          <div class="step-circle">4</div>
+          <span class="step-label">Calibrate</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step Views -->
+    <main class="step-views">
+
+      <!-- Step 1: Exam Details -->
+      <section class="step-view active" id="step1">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>📅 Exam Details</h2>
+            <p>Tell us about your upcoming exam</p>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="subjectName">Subject Name</label>
+              <input type="text" id="subjectName" placeholder="e.g. Data Structures & Algorithms" autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="examDate">Exam Date</label>
+                <input type="date" id="examDate" />
+              </div>
+              <div class="form-group">
+                <label for="examTime">Exam Time</label>
+                <input type="time" id="examTime" />
+              </div>
+            </div>
+            <div class="time-remaining-display" id="timeRemainingDisplay" style="display:none;">
+              <div class="time-badge">
+                <span class="time-icon">⏳</span>
+                <span id="timeRemainingText"></span>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-primary btn-next" id="step1Next">
+              Next <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Syllabus & Chapters -->
+      <section class="step-view" id="step2">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>📚 Syllabus & Chapters</h2>
+            <p>Add your chapters and their topics</p>
+          </div>
+          <div class="card-body">
+            <div id="chaptersContainer"></div>
+            <button class="btn btn-outline btn-add-chapter" id="addChapterBtn">
+              <span>＋</span> Add Chapter
+            </button>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-secondary btn-back" id="step2Back">
+              <span class="btn-arrow">←</span> Back
+            </button>
+            <button class="btn btn-primary btn-next" id="step2Next">
+              Next <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Study Materials -->
+      <section class="step-view" id="step3">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>📖 Study Materials</h2>
+            <p>Paste or upload study material for each chapter</p>
+          </div>
+          <div class="card-body">
+            <div id="materialsContainer"></div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-secondary btn-back" id="step3Back">
+              <span class="btn-arrow">←</span> Back
+            </button>
+            <button class="btn btn-primary btn-next" id="step3Next">
+              Next <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: Calibration -->
+      <section class="step-view" id="step4">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>🧠 Study Speed Calibration</h2>
+            <p>Let's measure how fast you study to build your personalized plan</p>
+          </div>
+          <div class="card-body">
+            <div id="calibrationArea">
+              <div class="calibration-passage" id="calibrationPassage"></div>
+              <div class="calibration-controls">
+                <button class="btn btn-accent" id="startReadingBtn">▶ Start Reading</button>
+                <button class="btn btn-accent" id="doneReadingBtn" style="display:none;">✅ Done Reading</button>
+                <div class="calibration-timer" id="calibrationTimer" style="display:none;">
+                  <span class="timer-label">Reading time:</span>
+                  <span class="timer-value" id="timerValue">0s</span>
+                </div>
+              </div>
+              <div class="calibration-result" id="calibrationResult" style="display:none;"></div>
+              <div class="time-options" id="timeOptions" style="display:none;"></div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-secondary btn-back" id="step4Back">
+              <span class="btn-arrow">←</span> Back
+            </button>
+            <button class="btn btn-primary btn-next" id="step4Next" style="display:none;">
+              Generate My Study Plan <span class="btn-arrow">🚀</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Dashboard (hidden until plan generated) -->
+    <section class="dashboard-view" id="dashboardView" style="display:none;">
+      <!-- Countdown -->
+      <div class="dashboard-header">
+        <h1>📋 Your Study Plan</h1>
+        <div class="exam-countdown" id="examCountdown"></div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Left: Topic List -->
+        <div class="dashboard-panel topics-panel">
+          <div class="panel-header">
+            <h3>🎯 Prioritized Topics</h3>
+            <div class="progress-summary" id="progressSummary"></div>
+          </div>
+          <div class="topics-list" id="topicsList"></div>
+          <div class="panel-footer">
+            <button class="btn btn-accent btn-generate-pdf" id="generatePdfBtn">
+              📄 Download Condensed Notes (PDF)
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Study Viewer -->
+        <div class="dashboard-panel study-panel">
+          <div class="panel-header">
+            <h3>📝 Condensed Notes</h3>
+            <div class="study-timer" id="studyTimer" style="display:none;">
+              <button class="btn btn-sm btn-timer" id="startStudyTimerBtn">▶</button>
+              <span id="studyTimerValue">00:00</span>
+              <button class="btn btn-sm btn-complete-topic" id="completeTopicBtn">✅ Mark Complete</button>
+            </div>
+          </div>
+          <div class="study-content" id="studyContent">
+            <div class="empty-state">
+              <span class="empty-icon">👈</span>
+              <p>Select a topic from the list to view condensed notes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/examInput.js"></script>
+  <script src="js/syllabusInput.js"></script>
+  <script src="js/materialInput.js"></script>
+  <script src="js/calibration.js"></script>
+  <script src="js/reducer.js"></script>
+  <script src="js/planner.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/pdfExport.js"></script>
+  <script>
+    // Initialize the app
+    CramPlan.init();
+  </script>
+</body>
+</html>
