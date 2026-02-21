@@ -1,4 +1,4 @@
-# CramPlan – Last Minute Study Planner 🎯
+# Attendance low,Hopes high – Last Minute Study Planner 🎯
 
 ## Basic Details
 **Team Name:** AUREA MECHANICS
